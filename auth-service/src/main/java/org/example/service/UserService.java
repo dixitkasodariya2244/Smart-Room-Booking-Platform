@@ -1,5 +1,6 @@
 package org.example.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.dto.RegisterRequest;
 import org.example.dto.UserDTO;
 import org.example.model.User;
@@ -11,13 +12,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserService(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
 
     public UserDTO register(RegisterRequest request){
         if (userRepository.existsByUsername(request.getUsername())){
