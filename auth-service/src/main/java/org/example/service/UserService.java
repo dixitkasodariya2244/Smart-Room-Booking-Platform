@@ -3,6 +3,7 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.RegisterRequest;
 import org.example.dto.UserDTO;
+import org.example.exceptionHandling.UserNotFoundException;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,32 @@ public class UserService {
                 .stream()
                 .map(u -> new UserDTO(u.getId(), u.getUsername(), u.getEmail()))
                 .collect(Collectors.toList());
+    }
+
+    public UserDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+    }
+
+    public UserDTO updateUser(Long id, RegisterRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        userRepository.save(user);
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+    }
+
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
     }
 
 }
