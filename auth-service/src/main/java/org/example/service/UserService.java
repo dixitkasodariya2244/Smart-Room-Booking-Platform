@@ -31,7 +31,6 @@ public class UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(new HashSet<>())
                 .build();
         user.getRoles().add("ROLE_USER");
 
