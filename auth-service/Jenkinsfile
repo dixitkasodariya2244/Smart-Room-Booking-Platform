@@ -55,12 +55,9 @@ pipeline {
 
         stage('Tag Git Version') {
             steps {
-                script {
-                    echo '🏷️ Tagging version in Git...'
-                    def tagName = "v${env.BUILD_NUMBER}"
-                    bat "git tag -a ${tagName} -m 'Build ${tagName}'"
-                    bat "git push origin ${tagName}"
-                }
+                echo '🏷️ Tagging version in Git...'
+                bat 'git tag -a v${BUILD_NUMBER} -m "Build v${BUILD_NUMBER}"'
+                bat 'git push origin v${BUILD_NUMBER}'
             }
         }
     }
