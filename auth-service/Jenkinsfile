@@ -24,7 +24,7 @@ pipeline {
         stage('Build with Maven') {
             steps {
                 echo '🔧 Building project with Maven...'
-                bat 'mvn clean package -DskipTests'
+                bat 'cd auth-service && mvn clean package -DskipTests'
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                 script {
                     echo '🐳 Building Docker image...'
                     def imageTag = "v${env.BUILD_NUMBER}"
-                    bat "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag} ."
+                    bat "cd auth-service && docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag} ."
                     bat "docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
                 }
             }
@@ -74,4 +74,3 @@ pipeline {
         }
     }
 }
-b
