@@ -3,6 +3,8 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.RegisterRequest;
 import org.example.dto.UserDTO;
+import org.example.exceptionHandling.EmailAlreadyExistsException;
+import org.example.exceptionHandling.UserAlreadyExistsException;
 import org.example.exceptionHandling.UserNotFoundException;
 import org.example.model.User;
 import org.example.repository.UserRepository;
@@ -22,10 +24,10 @@ public class UserService {
 
     public UserDTO register(RegisterRequest request){
         if (userRepository.existsByUsername(request.getUsername())){
-            throw  new IllegalArgumentException("Username already exists!!");
+            throw  new UserAlreadyExistsException("Username already exists!!" + request.getUsername());
         }
         if (userRepository.existsByEmail(request.getEmail())){
-            throw new IllegalArgumentException("Email already exists!!");
+            throw new EmailAlreadyExistsException("Email already exists!!" + request.getEmail());
         }
         User user= User.builder()
                 .username(request.getUsername())

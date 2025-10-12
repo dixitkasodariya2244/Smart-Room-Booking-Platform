@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven_3_9_6'
+    }
+
+    environment {
+        DOCKERHUB_USER = 'dixitkasodariya'
+        IMAGE_NAME = 'auth-service'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Pull the latest code from GitHub (auth-service branch)
+                checkout scmGit(
+                    branches: [[name: '*/feature/auth-service']],
+                    userRemoteConfigs: [[url: 'https://github.com/dixitkasodariya2244/Smart-Room-Booking-Platform']]
+                )
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                echo '🔧 Building project with Maven...'
+                bat 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo '🐳 Building Docker image...'
+                    def imageTag = "v${env.BUILD_NUMBER}"
+                    bat "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag} ."
+                    bat "docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    echo '📤 Pushing image to Docker Hub...'
+                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'DOCKERHUB_PASS')]) {
+                        bat "docker login -u ${DOCKERHUB_USER} -p %DOCKERHUB_PASS%"
+                        def imageTag = "v${env.BUILD_NUMBER}"
+                        bat "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${imageTag}"
+                        bat "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Tag Git Version') {
+            steps {
+                script {
+                    echo '🏷️ Tagging version in Git...'
+                    def tagName = "v${env.BUILD_NUMBER}"
+                    bat "git tag -a ${tagName} -m 'Build ${tagName}'"
+                    bat "git push origin ${tagName}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build and Push completed successfully!'
+        }
+        failure {
+            echo '❌ Build failed! Check logs for errors.'
+        }
+    }
+}
+b
