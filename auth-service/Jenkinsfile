@@ -55,12 +55,17 @@ pipeline {
 
         stage('Tag Git Version') {
             steps {
-                echo '🏷️ Tagging version in Git...'
-                bat 'git tag -a v${BUILD_NUMBER} -m "Build v${BUILD_NUMBER}"'
-                bat 'git push origin v${BUILD_NUMBER}'
+                script {
+                    echo '🏷️ Tagging version in Git...'
+                    bat """
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@example.com"
+                        git tag -a v${BUILD_NUMBER} -m "Build v${BUILD_NUMBER}"
+                        git push origin v${BUILD_NUMBER}
+                    """
+                }
             }
         }
-    }
 
     post {
         success {
