@@ -9,7 +9,9 @@ import org.example.exceptionHandling.UserNotFoundException;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,9 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-
+    @Transactional
     public UserDTO register(RegisterRequest request){
         if (userRepository.existsByUsername(request.getUsername())){
             throw  new UserAlreadyExistsException("Username already exists!!" + request.getUsername());

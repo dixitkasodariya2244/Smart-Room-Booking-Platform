@@ -26,7 +26,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest req) {
-        // This will throw an exception if authentication fails - handled by your GlobalExceptionHandler
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
 
         User u = userRepository.findByUsername(req.getUsername()).orElseThrow();

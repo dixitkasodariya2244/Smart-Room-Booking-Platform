@@ -3,6 +3,7 @@ package org.example.exceptionHandling;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,5 +49,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex, HttpServletRequest req) {
         return new ResponseEntity<>(buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), req.getRequestURI()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<Map<String,Object>> handleAuthExc(AuthenticationException ex, HttpServletRequest req) {
+        return new ResponseEntity<>(buildResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials", req.getRequestURI()), HttpStatus.UNAUTHORIZED);
     }
 }
