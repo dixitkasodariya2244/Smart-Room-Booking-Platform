@@ -16,6 +16,7 @@
     <!-- 🧱 Define all modules (each microservice) -->
     <modules>
         <module>auth-service</module>
+        <module>booking-service</module>
     </modules>
 
     <!--  Java & Spring Boot setup -->
