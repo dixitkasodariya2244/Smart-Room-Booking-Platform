@@ -1,7 +1,7 @@
 
 services:
   # PostgreSQL Database
-  db:
+  auth-db:
     image: postgres
     container_name: auth-db
     restart: always
@@ -10,16 +10,16 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: authdb
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - auth_pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dixitkasodariya -d authdb"]
+      test: [ "CMD-SHELL", "pg_isready -U dixitkasodariya -d authdb" ]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - auth-network
+      - microservices-network
 
   # 🚀 Spring Boot Auth Service
   auth-service:
@@ -29,10 +29,10 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      db:
+      auth-db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/authdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
       SPRING_DATASOURCE_USERNAME: dixitkasodariya
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
@@ -41,11 +41,32 @@ services:
     ports:
       - "4000:4000"
     networks:
-      - auth-network
+      - microservices-network
+
+  booking-db:
+    image: postgres
+    container_name: booking-db
+    restart: always
+    environment:
+      POSTGRES_USER: dixitkasodariya
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bookingdb
+    volumes:
+      - booking_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"   # Expose on host port 5433 to avoid conflict with auth-db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dixitkasodariya -d bookingdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
 
 volumes:
-  pgdata:
+  auth_pgdata:
+  booking_pgdata:
 
 networks:
-  auth-network:
+  microservices-network:
     driver: bridge

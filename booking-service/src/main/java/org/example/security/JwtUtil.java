@@ -22,24 +22,20 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms}")
+    @Value("${jwt.expiration-ms:3600000}")
     private long jwtExpirationMs;
 
     private Key key;
 
     @PostConstruct
     public void init() {
-        // Build a Key from the configured secret
         key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UserDetails userDetails, Long userId) {
-        Map<String, Object> claims = new HashMap<>();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+    public String generateToken(UserDetails userDetails) {
+        Map<String,Object> claims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         claims.put("roles", roles);
-        claims.put("userId", userId);
 
         Date now = new Date();
         Date exp = new Date(now.getTime() + jwtExpirationMs);
@@ -76,4 +72,18 @@ public class JwtUtil {
         }
         return Collections.emptyList();
     }
+
+    public Long getUserId(String token) {
+        Claims c = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Object idObj = c.get("userId");
+        if (idObj instanceof Number) {
+            return ((Number) idObj).longValue();
+        }
+        try {
+            return Long.parseLong(idObj.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }
