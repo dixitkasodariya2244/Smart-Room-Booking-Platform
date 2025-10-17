@@ -17,6 +17,7 @@
     <modules>
         <module>auth-service</module>
         <module>booking-service</module>
+        <module>room-service</module>
     </modules>
 
     <!--  Java & Spring Boot setup -->
