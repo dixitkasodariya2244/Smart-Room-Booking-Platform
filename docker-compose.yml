@@ -21,7 +21,7 @@ services:
     networks:
       - microservices-network
 
-  # 🚀 Spring Boot Auth Service
+  # Spring Boot Auth Service
   auth-service:
     build:
       context: ./auth-service
@@ -60,6 +60,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - microservices-network
+
+  # Spring Boot booking Service
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    restart: always
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://booking-db:5432/bookingdb
+      SPRING_DATASOURCE_USERNAME: dixitkasodariya
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: change_this_in_env_but_do_not_use_in_prod
+      JWT_EXPIRATION_MS: 3600000
+    ports:
+      - "4001:4001"
     networks:
       - microservices-network
 
